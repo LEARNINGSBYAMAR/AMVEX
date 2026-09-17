@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amvex Technologies — Software &amp; Game Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     Default = brand dark theme. Explicit overrides provided for
+     viewers whose system/app is set to light, and for a forced
+     data-theme attribute either way.
+  ============================================================ */
+  :root{
+    --bg:#0A0D16;
+    --panel:#131728;
+    --panel-raised:#1B2036;
+    --line:#262C46;
+    --ink:#ECEDF5;
+    --mist:#8890AC;
+    --amber:#F5A83C;
+    --amber-dim:#8A6122;
+    --violet:#7C6CF0;
+    --success:#5FD8A6;
+    --font-display:'Space Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-body:'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+    --maxw:1160px;
+    --radius-sm:10px;
+    --radius-md:16px;
+    --radius-lg:26px;
+  }
+
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#F3F2FA;
+      --panel:#FFFFFF;
+      --panel-raised:#FBFAFF;
+      --line:#E1DEF2;
+      --ink:#151327;
+      --mist:#615E7C;
+      --amber:#C97A11;
+      --amber-dim:#F1D3A0;
+      --violet:#6350D6;
+      --success:#1F9C6C;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F3F2FA;
+    --panel:#FFFFFF;
+    --panel-raised:#FBFAFF;
+    --line:#E1DEF2;
+    --ink:#151327;
+    --mist:#615E7C;
+    --amber:#C97A11;
+    --amber-dim:#F1D3A0;
+    --violet:#6350D6;
+    --success:#1F9C6C;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0A0D16;
+    --panel:#131728;
+    --panel-raised:#1B2036;
+    --line:#262C46;
+    --ink:#ECEDF5;
+    --mist:#8890AC;
+    --amber:#F5A83C;
+    --amber-dim:#8A6122;
+    --violet:#7C6CF0;
+    --success:#5FD8A6;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img,svg{ max-width:100%; display:block; }
+  a{ color:inherit; }
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+  section{ position:relative; }
+  ::selection{ background:var(--amber); color:#100C02; }
+
+  :focus-visible{ outline:2px solid var(--amber); outline-offset:3px; border-radius:4px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+  }
+
+  /* -------------------- NAV -------------------- */
+  header.site-nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    background:rgba(10,13,22,0.72);
+    backdrop-filter:blur(14px) saturate(140%);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s ease, background .3s ease;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]) header.site-nav{ background:rgba(243,242,250,0.78); }
+  }
+  :root[data-theme="light"] header.site-nav{ background:rgba(243,242,250,0.78); }
+  header.site-nav.scrolled{ border-bottom-color:var(--line); }
+  .nav-inner{ display:flex; align-items:center; justify-content:space-between; height:74px; }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:1.15rem; letter-spacing:-0.01em; text-decoration:none; }
+  .brand-mark{ width:30px; height:30px; flex:none; }
+  .nav-links{ display:flex; align-items:center; gap:34px; list-style:none; margin:0; padding:0; }
+  .nav-links a{ text-decoration:none; color:var(--mist); font-size:0.95rem; font-weight:500; transition:color .2s ease; position:relative; }
+  .nav-links a:hover{ color:var(--ink); }
+  .nav-cta{
+    background:var(--amber); color:#160F02; padding:10px 20px; border-radius:999px;
+    font-weight:600; font-size:0.92rem; text-decoration:none; border:none; cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .nav-cta:hover{ transform:translateY(-1px); box-shadow:0 8px 24px -6px rgba(245,168,60,0.55); }
+  .nav-toggle{ display:none; background:none; border:none; color:var(--ink); cursor:pointer; padding:6px; }
+  .mobile-panel{ display:none; }
+
+  @media (max-width:860px){
+    .nav-links{ display:none; }
+    .nav-toggle{ display:block; }
+    .mobile-panel.open{
+      display:block; position:fixed; inset:74px 0 0 0; background:var(--bg);
+      padding:20px 28px 40px; z-index:99; overflow-y:auto;
+    }
+    .mobile-panel a{ display:block; padding:16px 0; border-bottom:1px solid var(--line); text-decoration:none; color:var(--ink); font-family:var(--font-display); font-size:1.2rem; }
+  }
+
+  /* -------------------- HERO -------------------- */
+  .hero{
+    min-height:100svh;
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    align-items:center;
+    gap:20px;
+    padding-top:74px;
+  }
+  .hero .wrap{ display:contents; }
+  .hero-copy{ padding:70px 0 60px 28px; max-width:600px; }
+  .hero-kicker{
+    display:inline-flex; align-items:center; gap:9px;
+    font-size:0.85rem; color:var(--mist); font-weight:500; margin-bottom:22px;
+  }
+  .hero-kicker .dot{ width:7px; height:7px; border-radius:50%; background:var(--success); box-shadow:0 0 0 3px rgba(95,216,166,0.18); }
+  .hero h1{
+    font-family:var(--font-display); font-weight:700; letter-spacing:-0.02em;
+    font-size:clamp(2.4rem, 4.6vw, 4rem); line-height:1.04; margin:0 0 26px;
+  }
+  .hero h1 .grad{
+    background:linear-gradient(100deg, var(--amber), var(--violet));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p.lead{ font-size:1.12rem; color:var(--mist); max-width:480px; margin:0 0 36px; }
+  .hero-actions{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:56px; }
+  .btn{
+    display:inline-flex; align-items:center; gap:9px; padding:14px 26px; border-radius:999px;
+    font-weight:600; font-size:0.98rem; text-decoration:none; cursor:pointer; border:1px solid transparent;
+    transition:transform .18s ease, box-shadow .18s ease, background .2s ease, border-color .2s ease;
+  }
+  .btn-primary{ background:var(--amber); color:#160F02; }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 28px -8px rgba(245,168,60,0.5); }
+  .btn-ghost{ background:transparent; border-color:var(--line); color:var(--ink); }
+  .btn-ghost:hover{ border-color:var(--mist); }
+  .hero-stats{ display:flex; gap:38px; flex-wrap:wrap; }
+  .hero-stat b{ display:block; font-family:var(--font-display); font-size:1.7rem; font-weight:700; }
+  .hero-stat span{ color:var(--mist); font-size:0.85rem; }
+
+  .hero-visual{ position:relative; height:100%; min-height:520px; }
+  .hero-visual canvas{ width:100%; height:100%; display:block; }
+  .hero-visual::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse at 60% 50%, transparent 40%, var(--bg) 92%);
+  }
+
+  @media (max-width:960px){
+    .hero{ grid-template-columns:1fr; }
+    .hero-copy{ padding:48px 0 20px 0; max-width:none; }
+    .hero-visual{ min-height:360px; order:-1; }
+  }
+
+  /* -------------------- SECTION HEADINGS -------------------- */
+  .section-head{ max-width:600px; margin:0 0 52px; }
+  .section-head h2{
+    font-family:var(--font-display); font-size:clamp(1.8rem, 3vw, 2.5rem);
+    font-weight:700; letter-spacing:-0.015em; margin:0 0 14px; line-height:1.12;
+  }
+  .section-head p{ color:var(--mist); font-size:1.05rem; margin:0; }
+  .section-pad{ padding:120px 0; }
+  @media (max-width:760px){ .section-pad{ padding:80px 0; } }
+
+  /* -------------------- SERVICES (asymmetric bento) -------------------- */
+  .bento{
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap:18px;
+  }
+  .svc-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:34px; display:flex; flex-direction:column; gap:16px; justify-content:space-between;
+    transition:transform .25s ease, border-color .25s ease, background .25s ease;
+    grid-column:span 3;
+  }
+  .svc-card:hover{ transform:translateY(-4px); border-color:var(--amber-dim); background:var(--panel-raised); }
+  .svc-card.big{ grid-column:span 3; min-height:280px; }
+  .svc-card.small{ grid-column:span 2; min-height:230px; }
+  @media (max-width:900px){ .svc-card.big, .svc-card.small{ grid-column:span 6; } }
+  .svc-icon{ width:44px; height:44px; color:var(--amber); }
+  .svc-card.alt .svc-icon{ color:var(--violet); }
+  .svc-card h3{ font-family:var(--font-display); font-size:1.25rem; margin:0; font-weight:600; }
+  .svc-card p{ color:var(--mist); margin:0; font-size:0.96rem; }
+  .svc-tags{ display:flex; gap:8px; flex-wrap:wrap; }
+  .svc-tag{ font-size:0.76rem; color:var(--mist); border:1px solid var(--line); padding:4px 10px; border-radius:999px; }
+
+  /* -------------------- ENGINE / TECH SECTION -------------------- */
+  .engine{ background:var(--panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .engine-grid{ display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+  @media (max-width:900px){ .engine-grid{ grid-template-columns:1fr; } }
+  .flow-svg{ width:100%; height:auto; }
+  .code-block{
+    background:#0D1120; border:1px solid var(--line); border-radius:var(--radius-md);
+    padding:22px 24px; font-family:var(--font-mono); font-size:0.84rem; overflow-x:auto;
+    color:#C7CCE6; line-height:1.7;
+  }
+  @media (prefers-color-scheme:light){
+    :root:not([data-theme="dark"]) .code-block{ background:#151233; color:#E4E1FF; }
+  }
+  :root[data-theme="light"] .code-block{ background:#151233; color:#E4E1FF; }
+  .code-block .k{ color:#F5A83C; }
+  .code-block .s{ color:#5FD8A6; }
+  .code-block .f{ color:#7C6CF0; }
+  .code-block .c{ color:#6A7092; }
+  .stack-row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
+  .stack-chip{
+    display:flex; align-items:center; gap:8px; background:var(--panel-raised); border:1px solid var(--line);
+    padding:8px 14px; border-radius:999px; font-size:0.85rem; font-weight:500;
+  }
+  .stack-chip .sw{ width:8px; height:8px; border-radius:50%; }
+
+  /* -------------------- WORK / PROJECTS -------------------- */
+  .work-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:22px; }
+  @media (max-width:900px){ .work-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:640px){ .work-grid{ grid-template-columns:1fr; } }
+  .work-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md);
+    overflow:hidden; text-decoration:none; color:inherit; display:block;
+    transition:transform .25s ease, border-color .25s ease;
+  }
+  .work-card:hover{ transform:translateY(-5px); border-color:var(--amber-dim); }
+  .work-thumb{ aspect-ratio:16/10.5; width:100%; }
+  .work-body{ padding:20px 22px 24px; }
+  .work-kind{ font-size:0.78rem; color:var(--amber); font-weight:600; margin-bottom:8px; }
+  .work-card.alt .work-kind{ color:var(--violet); }
+  .work-body h3{ font-family:var(--font-display); font-size:1.08rem; margin:0 0 8px; font-weight:600; }
+  .work-body p{ margin:0; color:var(--mist); font-size:0.9rem; }
+
+  /* -------------------- PROCESS TIMELINE -------------------- */
+  .timeline{ position:relative; padding-left:36px; }
+  .timeline::before{ content:''; position:absolute; left:9px; top:6px; bottom:6px; width:2px; background:var(--line); }
+  .t-step{ position:relative; padding-bottom:44px; }
+  .t-step:last-child{ padding-bottom:0; }
+  .t-step::before{
+    content:''; position:absolute; left:-36px; top:2px; width:20px; height:20px; border-radius:50%;
+    background:var(--bg); border:2px solid var(--amber);
+  }
+  .t-step h3{ font-family:var(--font-display); font-size:1.15rem; margin:0 0 8px; font-weight:600; }
+  .t-step p{ margin:0; color:var(--mist); max-width:560px; }
+  .t-step .t-meta{ font-size:0.82rem; color:var(--amber); font-weight:600; margin-bottom:6px; display:block; }
+
+  /* -------------------- CONTACT -------------------- */
+  .contact-grid{ display:grid; grid-template-columns:1fr 1fr; gap:60px; }
+  @media (max-width:900px){ .contact-grid{ grid-template-columns:1fr; } }
+  .contact-info dl{ margin:26px 0 0; }
+  .contact-info dt{ color:var(--mist); font-size:0.85rem; margin-top:18px; }
+  .contact-info dd{ margin:4px 0 0; font-size:1.05rem; font-weight:500; }
+  .contact-info dd a{ text-decoration:none; border-bottom:1px solid var(--line); }
+  .field{ margin-bottom:18px; }
+  .field label{ display:block; font-size:0.88rem; color:var(--mist); margin-bottom:7px; }
+  .field input, .field select, .field textarea{
+    width:100%; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:13px 15px; color:var(--ink); font-family:var(--font-body); font-size:0.96rem;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--amber); outline:none; }
+  .field textarea{ resize:vertical; min-height:110px; }
+  .form-msg{ margin-top:16px; font-size:0.9rem; display:none; }
+  .form-msg.show{ display:block; }
+  .form-msg.ok{ color:var(--success); }
+
+  /* -------------------- FOOTER -------------------- */
+  footer{ border-top:1px solid var(--line); padding:52px 0 34px; }
+  .footer-top{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:30px; margin-bottom:36px; }
+  .footer-links{ display:flex; gap:44px; flex-wrap:wrap; }
+  .footer-links h4{ font-size:0.8rem; color:var(--mist); margin:0 0 12px; font-weight:600; }
+  .footer-links ul{ list-style:none; margin:0; padding:0; }
+  .footer-links li{ margin-bottom:9px; }
+  .footer-links a{ text-decoration:none; color:var(--ink); font-size:0.92rem; }
+  .footer-links a:hover{ color:var(--amber); }
+  .footer-bottom{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; padding-top:26px; border-top:1px solid var(--line); color:var(--mist); font-size:0.83rem; }
+
+  .reveal{ opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.visible{ opacity:1; transform:none; }
+</style>
+</head>
+<body>
+
+<header class="site-nav" id="siteNav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 2L29 9V23L16 30L3 23V9L16 2Z" stroke="var(--amber)" stroke-width="1.6"/>
+        <path d="M16 2V16M16 16L29 9M16 16L3 9M16 16V30" stroke="var(--violet)" stroke-width="1.2" opacity="0.7"/>
+      </svg>
+      <span id="brandName">Amvex</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#engine">Engine</a></li>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#process">Process</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Start a project</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="mobile-panel" id="mobilePanel">
+    <a href="#services">Services</a>
+    <a href="#engine">Engine</a>
+    <a href="#work">Work</a>
+    <a href="#process">Process</a>
+    <a href="#contact">Contact</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="hero-kicker"><span class="dot"></span><span id="heroKicker">Available for new builds — Q4 2026</span></div>
+      <h1 id="heroHeadline">We engineer the <span class="grad">software</span> and build the <span class="grad">worlds</span> you imagine.</h1>
+      <p class="lead" id="heroLead">Amvex Technologies Private Limited designs and ships production software, web platforms, and games — with Python and FastAPI running the systems underneath.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary">Start a project</a>
+        <a href="#work" class="btn btn-ghost">See our work</a>
+      </div>
+      <div class="hero-stats" id="heroStats"></div>
+    </div>
+    <div class="hero-visual">
+      <canvas id="meshCanvas"></canvas>
+    </div>
+  </section>
+
+  <section class="section-pad" id="services">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>One team, every layer of the build.</h2>
+        <p>From a game's render loop to the API that saves a player's progress — we cover the full stack, in-house.</p>
+      </div>
+      <div class="bento" id="servicesGrid"></div>
+    </div>
+  </section>
+
+  <section class="engine section-pad" id="engine">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Python runs the engine room.</h2>
+        <p>Every product we ship is backed by typed, tested Python services — most of them FastAPI, all of them built to be replaced or extended without fear.</p>
+      </div>
+      <div class="engine-grid">
+        <div class="reveal">
+          <svg class="flow-svg" viewBox="0 0 480 220" id="flowSvg">
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--mist)"/></marker>
+            </defs>
+            <g font-family="Inter, sans-serif" font-size="12" fill="var(--ink)">
+              <rect x="14" y="86" width="108" height="48" rx="10" fill="var(--panel-raised)" stroke="var(--line)"/>
+              <text x="68" y="114" text-anchor="middle">Client / Game</text>
+              <rect x="186" y="20" width="108" height="48" rx="10" fill="var(--panel-raised)" stroke="var(--amber)"/>
+              <text x="240" y="48" text-anchor="middle">FastAPI</text>
+              <rect x="186" y="152" width="108" height="48" rx="10" fill="var(--panel-raised)" stroke="var(--line)"/>
+              <text x="240" y="180" text-anchor="middle">Workers / Queue</text>
+              <rect x="358" y="86" width="108" height="48" rx="10" fill="var(--panel-raised)" stroke="var(--line)"/>
+              <text x="412" y="114" text-anchor="middle">Data store</text>
+              <path d="M122,100 L186,55" stroke="var(--mist)" fill="none" marker-end="url(#arrow)"/>
+              <path d="M294,55 L358,100" stroke="var(--mist)" fill="none" marker-end="url(#arrow)"/>
+              <path d="M294,165 L186,165" stroke="var(--mist)" fill="none" marker-end="url(#arrow)" opacity="0.5"/>
+              <path d="M240,68 L240,152" stroke="var(--mist)" fill="none" marker-end="url(#arrow)" opacity="0.5"/>
+            </g>
+            <circle id="packet1" r="4.5" fill="var(--amber)"/>
+            <circle id="packet2" r="4.5" fill="var(--violet)"/>
+          </svg>
+        </div>
+        <div class="reveal">
+          <div class="code-block"><span class="c"># services/routes/save_progress.py</span><br>
+<span class="k">from</span> fastapi <span class="k">import</span> APIRouter<br>
+<span class="k">from</span> .models <span class="k">import</span> ProgressIn<br><br>
+router = APIRouter()<br><br>
+<span class="k">@router</span>.post(<span class="s">"/api/progress"</span>)<br>
+<span class="k">async def</span> <span class="f">save_progress</span>(payload: ProgressIn):<br>
+&nbsp;&nbsp;<span class="c"># validated by Pydantic, persisted async</span><br>
+&nbsp;&nbsp;<span class="k">await</span> store.save(payload)<br>
+&nbsp;&nbsp;<span class="k">return</span> {<span class="s">"status"</span>: <span class="s">"saved"</span>}</div>
+          <div class="stack-row" id="stackRow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad" id="work">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Recent builds.</h2>
+        <p>A mix of client software, web platforms, and games — swap in your own case studies any time.</p>
+      </div>
+      <div class="work-grid" id="workGrid"></div>
+    </div>
+  </section>
+
+  <section class="section-pad" id="process">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>How a build moves through Amvex.</h2>
+        <p>The same five stages whether we're shipping an internal tool or a multiplayer game.</p>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+  </section>
+
+  <section class="section-pad" id="contact">
+    <div class="wrap contact-grid">
+      <div class="reveal">
+        <div class="section-head" style="margin-bottom:0;">
+          <h2>Tell us what you're building.</h2>
+          <p>Share a few details and someone from the team will reply within a couple of business days.</p>
+        </div>
+        <div class="contact-info">
+          <dl id="contactInfo"></dl>
+        </div>
+      </div>
+      <form class="reveal" id="contactForm">
+        <div class="field">
+          <label for="cf-name">Your name</label>
+          <input id="cf-name" name="name" type="text" required>
+        </div>
+        <div class="field">
+          <label for="cf-email">Email</label>
+          <input id="cf-email" name="email" type="email" required>
+        </div>
+        <div class="field">
+          <label for="cf-type">Project type</label>
+          <select id="cf-type" name="type">
+            <option>Software / internal tools</option>
+            <option>Website / web app</option>
+            <option>Game development</option>
+            <option>Something else</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cf-message">Project details</label>
+          <textarea id="cf-message" name="message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Send message</button>
+        <p class="form-msg ok" id="formMsg">Thanks — your message is queued. We'll be in touch shortly.</p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <a href="#top" class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 2L29 9V23L16 30L3 23V9L16 2Z" stroke="var(--amber)" stroke-width="1.6"/>
+        </svg>
+        <span id="footerBrand">Amvex Technologies</span>
+      </a>
+      <div class="footer-links" id="footerLinks"></div>
+    </div>
+    <div class="footer-bottom">
+      <span id="footerCopy">© 2026 Amvex Technologies Private Limited. All rights reserved.</span>
+      <span id="footerNote">Built with Python &amp; FastAPI.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* =====================================================================
+   AMVEX_CONFIG
+   Every piece of text, contact info, service, project and color seed on
+   this site is read from this one object. Edit values here — nothing
+   else in the file needs to change for content updates.
+
+   "visual" fields (services & projects) don't point at image files.
+   They describe a generated pattern (type + two colors) that is drawn
+   on a <canvas> at render time — see generatePatternCanvas() below.
+   That keeps every visual fully data-driven and license-free; swap in
+   real photography later by replacing renderWorkThumb()/renderServiceIcon
+   with an <img src="..."> if you prefer.
+===================================================================== */
+window.AMVEX_CONFIG = {
+  company: {
+    name: "Amvex Technologies Private Limited",
+    shortName: "Amvex",
+    foundedYear: 2026,
+    tagline: "Software and game development, built end to end.",
+    email: "amarjith@amvex.in",
+    phone: "+91 94960 63951",
+    address: "Calicut, Kerala, India",
+    socials: [
+      { label: "LinkedIn", url: "#" },
+      { label: "GitHub", url: "#" },
+      { label: "X / Twitter", url: "#" }
+    ]
+  },
+
+  hero: {
+    kicker: "Available for new builds — Q4 2026",
+    headlinePrefix: "We engineer the ",
+    headlineHighlight1: "software",
+    headlineMiddle: " and build the ",
+    headlineHighlight2: "worlds",
+    headlineSuffix: " you imagine.",
+    lead: "Amvex Technologies Private Limited designs and ships production software, web platforms, and games — with Python and FastAPI running the systems underneath.",
+    stats: [
+      { value: "3", label: "core disciplines" },
+      { value: "100%", label: "Python-backed APIs" },
+      { value: "24/7", label: "monitored deployments" }
+    ]
+  },
+
+  services: [
+    {
+      size: "big",
+      title: "Software Development",
+      description: "Custom internal tools, automation and SaaS products, architected in Python and shipped with typed APIs from day one.",
+      tags: ["FastAPI", "PostgreSQL", "Docker"],
+      icon: "code",
+      alt: false
+    },
+    {
+      size: "big",
+      title: "Game Development",
+      description: "2D and 3D games and prototypes — gameplay systems, live-ops backends, and matchmaking services that scale with your player base.",
+      tags: ["Unity", "Godot", "WebSocket"],
+      icon: "controller",
+      alt: true
+    },
+    {
+      size: "small",
+      title: "Web Development",
+      description: "Marketing sites and web apps that load fast and animate with intent, not decoration.",
+      tags: ["React", "FastAPI"],
+      icon: "browser",
+      alt: false
+    },
+    {
+      size: "small",
+      title: "Cloud & DevOps",
+      description: "CI/CD, containerized deployments and observability so releases stop being an event.",
+      tags: ["Docker", "CI/CD"],
+      icon: "cloud",
+      alt: true
+    },
+    {
+      size: "small",
+      title: "APIs & Integrations",
+      description: "Third-party integrations and internal APIs, documented and versioned from the first commit.",
+      tags: ["FastAPI", "OpenAPI"],
+      icon: "api",
+      alt: false
+    }
+  ],
+
+  stack: [
+    { name: "Python", color: "#F5A83C" },
+    { name: "FastAPI", color: "#5FD8A6" },
+    { name: "PostgreSQL", color: "#7C6CF0" },
+    { name: "Redis", color: "#F5A83C" },
+    { name: "Docker", color: "#5FD8A6" },
+    { name: "Unity / Godot", color: "#7C6CF0" }
+  ],
+
+  projects: [
+    {
+      title: "Ledgerline",
+      kind: "Software",
+      description: "Internal finance automation tool replacing three spreadsheets and a lot of email.",
+      pattern: "grid", colorA: "#F5A83C", colorB: "#0A0D16"
+    },
+    {
+      title: "Driftbound",
+      kind: "Game",
+      description: "A low-poly co-op exploration game with a Python-backed matchmaking service.",
+      pattern: "hex", colorA: "#7C6CF0", colorB: "#0A0D16"
+    },
+    {
+      title: "Northreach",
+      kind: "Website",
+      description: "A logistics company's public site and customer portal, rebuilt for speed.",
+      pattern: "wave", colorA: "#5FD8A6", colorB: "#0A0D16"
+    },
+    {
+      title: "Signalboard",
+      kind: "Software",
+      description: "A real-time ops dashboard streaming metrics over WebSockets from a FastAPI core.",
+      pattern: "grid", colorA: "#7C6CF0", colorB: "#0A0D16"
+    },
+    {
+      title: "Emberkeep",
+      kind: "Game",
+      description: "A mobile idle-strategy game with cloud save and a Python live-ops backend.",
+      pattern: "hex", colorA: "#F5A83C", colorB: "#0A0D16"
+    },
+    {
+      title: "Fieldkit",
+      kind: "Website",
+      description: "A booking and scheduling web app for a field-services client.",
+      pattern: "wave", colorA: "#5FD8A6", colorB: "#0A0D16"
+    }
+  ],
+
+  process: [
+    { meta: "01 · Discover", title: "Scope the real problem", description: "We start with your users and constraints, not a feature list — a short discovery phase turns into a written brief." },
+    { meta: "02 · Design", title: "Architecture & interface", description: "System design for the engineers, wireframes and motion studies for the interface — reviewed together before a line of production code." },
+    { meta: "03 · Build", title: "Build in short cycles", description: "Python services and interfaces are built in weekly increments, each one demoable and deployable on its own." },
+    { meta: "04 · Playtest & QA", title: "Test like a player, not a developer", description: "Automated test suites plus manual playtesting or user testing on every release candidate." },
+    { meta: "05 · Launch & Support", title: "Ship, monitor, iterate", description: "We stay on for monitoring, on-call support and the next round of features after launch." }
+  ],
+
+  footerLinks: [
+    { heading: "Company", links: [ { label: "Services", url: "#services" }, { label: "Our work", url: "#work" }, { label: "Process", url: "#process" } ] },
+    { heading: "Contact", links: [ { label: "Start a project", url: "#contact" }, { label: "Email us", url: "mailto:hello@amvex.tech" } ] }
+  ]
+};
+
+/* =====================================================================
+   RENDERING — reads AMVEX_CONFIG above and builds the DOM.
+   Nothing below this line needs editing for a normal content update.
+===================================================================== */
+(function(){
+  "use strict";
+  var CFG = window.AMVEX_CONFIG;
+
+  function el(tag, cls, html){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(html !== undefined) e.innerHTML = html;
+    return e;
+  }
+
+  /* ---- text / brand ---- */
+  document.title = CFG.company.shortName + " Technologies — Software & Game Development";
+  document.getElementById('brandName').textContent = CFG.company.shortName;
+  document.getElementById('footerBrand').textContent = CFG.company.name;
+  document.getElementById('footerCopy').textContent = "© " + CFG.company.foundedYear + " " + CFG.company.name + ". All rights reserved.";
+  document.getElementById('heroKicker').textContent = CFG.hero.kicker;
+  document.getElementById('heroLead').textContent = CFG.hero.lead;
+  document.getElementById('heroHeadline').innerHTML =
+    CFG.hero.headlinePrefix + '<span class="grad">' + CFG.hero.headlineHighlight1 + '</span>' +
+    CFG.hero.headlineMiddle + '<span class="grad">' + CFG.hero.headlineHighlight2 + '</span>' +
+    CFG.hero.headlineSuffix;
+
+  var statsWrap = document.getElementById('heroStats');
+  CFG.hero.stats.forEach(function(s){
+    var d = el('div','hero-stat', '<b>'+s.value+'</b><span>'+s.label+'</span>');
+    statsWrap.appendChild(d);
+  });
+
+  /* ---- icons ---- */
+  var ICONS = {
+    code: '<svg viewBox="0 0 44 44" fill="none"><path d="M16 14L7 22L16 30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 14L37 22L28 30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 9L19 35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    controller: '<svg viewBox="0 0 44 44" fill="none"><rect x="4" y="16" width="36" height="18" rx="9" stroke="currentColor" stroke-width="2"/><path d="M13 21V29M9 25H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="31" cy="21" r="1.6" fill="currentColor"/><circle cx="27" cy="25" r="1.6" fill="currentColor"/><circle cx="35" cy="25" r="1.6" fill="currentColor"/><circle cx="31" cy="29" r="1.6" fill="currentColor"/></svg>',
+    browser: '<svg viewBox="0 0 44 44" fill="none"><rect x="4" y="8" width="36" height="28" rx="4" stroke="currentColor" stroke-width="2"/><path d="M4 16H40" stroke="currentColor" stroke-width="2"/><circle cx="9.5" cy="12" r="1.2" fill="currentColor"/><circle cx="14" cy="12" r="1.2" fill="currentColor"/></svg>',
+    cloud: '<svg viewBox="0 0 44 44" fill="none"><path d="M13 30C8 30 5 27 5 23C5 19.3 8 16.5 11.5 16.4C12.7 11.7 17 8.5 22 9.2C26.2 9.8 29.3 13 30 17C34 17.2 37 20 37 24C37 27.5 34 30 30 30H13Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+    api: '<svg viewBox="0 0 44 44" fill="none"><circle cx="10" cy="22" r="5" stroke="currentColor" stroke-width="2"/><circle cx="34" cy="10" r="5" stroke="currentColor" stroke-width="2"/><circle cx="34" cy="34" r="5" stroke="currentColor" stroke-width="2"/><path d="M15 22L29 12M15 22L29 32" stroke="currentColor" stroke-width="2"/></svg>'
+  };
+
+  /* ---- services (bento) ---- */
+  var grid = document.getElementById('servicesGrid');
+  CFG.services.forEach(function(svc){
+    var card = el('div', 'svc-card ' + svc.size + (svc.alt ? ' alt' : ''));
+    var tagsHtml = svc.tags.map(function(t){ return '<span class="svc-tag">'+t+'</span>'; }).join('');
+    card.innerHTML =
+      '<div class="svc-icon">' + (ICONS[svc.icon] || '') + '</div>' +
+      '<div><h3>'+svc.title+'</h3><p>'+svc.description+'</p></div>' +
+      '<div class="svc-tags">'+tagsHtml+'</div>';
+    grid.appendChild(card);
+  });
+
+  /* ---- stack chips ---- */
+  var stackRow = document.getElementById('stackRow');
+  CFG.stack.forEach(function(s){
+    var chip = el('div','stack-chip','<span class="sw" style="background:'+s.color+'"></span>'+s.name);
+    stackRow.appendChild(chip);
+  });
+
+  /* ---- generative pattern thumbnails (replace real photography) ---- */
+  function generatePatternCanvas(pattern, colorA, colorB, w, h){
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var ctx = c.getContext('2d');
+    var grad = ctx.createLinearGradient(0,0,w,h);
+    grad.addColorStop(0, colorB);
+    grad.addColorStop(1, shadeColor(colorB, 12));
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle = colorA;
+    ctx.fillStyle = colorA;
+
+    if(pattern === 'grid'){
+      ctx.globalAlpha = 0.55;
+      ctx.lineWidth = 1;
+      var step = w / 12;
+      for(var x=0;x<=w;x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+      for(var y=0;y<=h;y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(w*0.72, h*0.35, w*0.05, 0, Math.PI*2); ctx.fill();
+    } else if(pattern === 'hex'){
+      ctx.globalAlpha = 0.65;
+      ctx.lineWidth = 1.4;
+      var r = w/9, hgt = r*Math.sqrt(3);
+      for(var row=-1; row<h/hgt+1; row++){
+        for(var col=-1; col<w/(r*1.5)+1; col++){
+          var cx = col*r*1.5;
+          var cy = row*hgt + (col%2?hgt/2:0);
+          drawHex(ctx, cx, cy, r*0.92);
+        }
+      }
+      ctx.globalAlpha = 1;
+    } else if(pattern === 'wave'){
+      ctx.globalAlpha = 0.7;
+      ctx.lineWidth = 1.6;
+      for(var i=0;i<6;i++){
+        ctx.beginPath();
+        var amp = 10 + i*3, freq = 0.02 + i*0.002, phase = i*0.6, baseY = (h/7)*(i+1);
+        for(var px=0; px<=w; px+=4){
+          var py = baseY + Math.sin(px*freq + phase)*amp;
+          if(px===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+        }
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+    return c;
+  }
+  function drawHex(ctx,cx,cy,r){
+    ctx.beginPath();
+    for(var i=0;i<6;i++){
+      var ang = Math.PI/180*(60*i-30);
+      var px = cx + r*Math.cos(ang), py = cy + r*Math.sin(ang);
+      if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.closePath(); ctx.stroke();
+  }
+  function shadeColor(hex, percent){
+    var f=parseInt(hex.slice(1),16), t=percent<0?0:255, p=Math.abs(percent)/100;
+    var R=f>>16, G=f>>8&0x00FF, B=f&0x0000FF;
+    var rr = Math.round((t-R)*p)+R, gg = Math.round((t-G)*p)+G, bb = Math.round((t-B)*p)+B;
+    return "#" + (0x1000000 + rr*0x10000 + gg*0x100 + bb).toString(16).slice(1);
+  }
+
+  /* ---- work grid ---- */
+  var workGrid = document.getElementById('workGrid');
+  CFG.projects.forEach(function(p, idx){
+    var card = el('a', 'work-card' + (idx%2 ? ' alt' : ''));
+    card.href = '#contact';
+    var thumbHolder = el('div','work-thumb');
+    var canvas = generatePatternCanvas(p.pattern, p.colorA, p.colorB, 480, 315);
+    canvas.style.width = '100%'; canvas.style.height = '100%';
+    thumbHolder.appendChild(canvas);
+    var body = el('div','work-body','<div class="work-kind">'+p.kind+'</div><h3>'+p.title+'</h3><p>'+p.description+'</p>');
+    card.appendChild(thumbHolder);
+    card.appendChild(body);
+    workGrid.appendChild(card);
+  });
+
+  /* ---- process timeline ---- */
+  var tl = document.getElementById('timeline');
+  CFG.process.forEach(function(step){
+    var s = el('div','t-step','<span class="t-meta">'+step.meta+'</span><h3>'+step.title+'</h3><p>'+step.description+'</p>');
+    tl.appendChild(s);
+  });
+
+  /* ---- contact info + footer links ---- */
+  var infoWrap = document.getElementById('contactInfo');
+  infoWrap.innerHTML =
+    '<dt>Email</dt><dd><a href="mailto:'+CFG.company.email+'">'+CFG.company.email+'</a></dd>' +
+    '<dt>Phone</dt><dd>'+CFG.company.phone+'</dd>' +
+    '<dt>Studio</dt><dd>'+CFG.company.address+'</dd>';
+
+  var footerLinks = document.getElementById('footerLinks');
+  CFG.footerLinks.forEach(function(group){
+    var lis = group.links.map(function(l){ return '<li><a href="'+l.url+'">'+l.label+'</a></li>'; }).join('');
+    var block = el('div','','<h4>'+group.heading+'</h4><ul>'+lis+'</ul>');
+    footerLinks.appendChild(block);
+  });
+
+  /* ---- nav scroll state + mobile toggle ---- */
+  var nav = document.getElementById('siteNav');
+  window.addEventListener('scroll', function(){
+    nav.classList.toggle('scrolled', window.scrollY > 8);
+  });
+  var toggle = document.getElementById('navToggle');
+  var panel = document.getElementById('mobilePanel');
+  toggle.addEventListener('click', function(){ panel.classList.toggle('open'); });
+  panel.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', function(){ panel.classList.remove('open'); }); });
+
+  /* ---- scroll reveal ---- */
+  var revealEls = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('visible'); io.unobserve(en.target); } });
+  }, { threshold: 0.15 });
+  revealEls.forEach(function(r){ io.observe(r); });
+
+  /* ---- contact form (client-side demo submit) ----
+     Wire this to your FastAPI backend's POST /api/contact once the
+     site is deployed on your own domain — published preview links
+     can only call a short allow-list of hosts, not custom APIs. */
+  var form = document.getElementById('contactForm');
+  var msg = document.getElementById('formMsg');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    // Example of what the live wiring looks like:
+    // fetch('https://your-domain.example/api/contact', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(Object.fromEntries(new FormData(form))) })
+    msg.classList.add('show');
+    form.reset();
+  });
+
+  /* ================= HERO MESH ANIMATION =================
+     A wireframe sphere assembles once on load, then rotates slowly.
+     Pure canvas 2D, no dependencies. */
+  var canvas = document.getElementById('meshCanvas');
+  var ctx2 = canvas.getContext('2d');
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var points = [], edges = [];
+
+  function buildSphere(n){
+    points = [];
+    var offset = 2/n, increment = Math.PI*(3-Math.sqrt(5));
+    for(var i=0;i<n;i++){
+      var y = ((i*offset)-1) + (offset/2);
+      var r = Math.sqrt(Math.max(0,1-y*y));
+      var phi = i*increment;
+      points.push({ x:Math.cos(phi)*r, y:y, z:Math.sin(phi)*r });
+    }
+    edges = [];
+    for(i=0;i<points.length;i++){
+      var dists = [];
+      for(var j=0;j<points.length;j++){
+        if(i===j) continue;
+        var dx=points[i].x-points[j].x, dy=points[i].y-points[j].y, dz=points[i].z-points[j].z;
+        dists.push([j, dx*dx+dy*dy+dz*dz]);
+      }
+      dists.sort(function(a,b){ return a[1]-b[1]; });
+      for(var k=0;k<3;k++){
+        var pair = [i, dists[k][0]].sort().join('-');
+        edges.push({ a:i, b:dists[k][0], key:pair });
+      }
+    }
+    var seen = {}, uniq = [];
+    edges.forEach(function(e){ if(!seen[e.key]){ seen[e.key]=true; uniq.push(e); } });
+    edges = uniq;
+  }
+  buildSphere(70);
+
+  function resizeCanvas(){
+    var rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * DPR;
+    canvas.height = rect.height * DPR;
+    canvas.style.width = rect.width+'px';
+    canvas.style.height = rect.height+'px';
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  var startTime = performance.now();
+  var ROOT = getComputedStyle(document.documentElement);
+  function cssVar(name){ return ROOT.getPropertyValue(name).trim(); }
+
+  function frame(now){
+    var t = (now - startTime) / 1000;
+    var assembly = Math.min(1, t / 1.6); // 0 -> 1 over 1.6s
+    var w = canvas.width, h = canvas.height;
+    ctx2.clearRect(0,0,w,h);
+
+    var cx = w*0.52, cy = h*0.5, radius = Math.min(w,h)*0.34;
+    var ry = t*0.18, rx = 0.3 + Math.sin(t*0.15)*0.08;
+
+    var proj = points.map(function(p){
+      var x = p.x, y = p.y, z = p.z;
+      var x1 = x*Math.cos(ry) + z*Math.sin(ry);
+      var z1 = -x*Math.sin(ry) + z*Math.cos(ry);
+      var y2 = y*Math.cos(rx) - z1*Math.sin(rx);
+      var z2 = y*Math.sin(rx) + z1*Math.cos(rx);
+      var scale = 1/(2 - z2*0.9);
+      return { x: cx + x1*radius*scale, y: cy + y2*radius*scale, z: z2 };
+    });
+
+    var amber = cssVar('--amber') || '#F5A83C';
+    var violet = cssVar('--violet') || '#7C6CF0';
+
+    edges.forEach(function(e, i){
+      var reveal = Math.min(1, Math.max(0, assembly*edges.length - i) );
+      if(reveal <= 0) return;
+      var p1 = proj[e.a], p2 = proj[e.b];
+      var depth = (p1.z + p2.z)/2;
+      var op = (0.12 + depth*0.18) * reveal;
+      ctx2.strokeStyle = (i % 5 === 0) ? hexToRgba(violet, op) : hexToRgba(amber, op*0.7);
+      ctx2.lineWidth = 1 * DPR;
+      ctx2.beginPath();
+      ctx2.moveTo(p1.x, p1.y);
+      ctx2.lineTo(p2.x, p2.y);
+      ctx2.stroke();
+    });
+
+    proj.forEach(function(p, i){
+      var reveal = Math.min(1, Math.max(0, assembly*points.length - i));
+      if(reveal <= 0) return;
+      var op = (0.35 + p.z*0.4) * reveal;
+      ctx2.fillStyle = hexToRgba(amber, Math.max(0,op));
+      ctx2.beginPath();
+      ctx2.arc(p.x, p.y, 1.6*DPR, 0, Math.PI*2);
+      ctx2.fill();
+    });
+
+    requestAnimationFrame(frame);
+  }
+  function hexToRgba(hex, a){
+    hex = hex.replace('#','');
+    if(hex.length===3) hex = hex.split('').map(function(c){return c+c;}).join('');
+    var r=parseInt(hex.slice(0,2),16), g=parseInt(hex.slice(2,4),16), b=parseInt(hex.slice(4,6),16);
+    return 'rgba('+r+','+g+','+b+','+Math.max(0,Math.min(1,a))+')';
+  }
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduceMotion){
+    requestAnimationFrame(frame);
+  } else {
+    // draw a single static frame for reduced-motion users
+    startTime = performance.now() - 5000;
+    requestAnimationFrame(frame);
+  }
+
+  /* ================= ENGINE FLOW: moving packets ================= */
+  var packet1 = document.getElementById('packet1');
+  var packet2 = document.getElementById('packet2');
+  var pathUp = [[68,110],[240,44]];
+  var pathDown = [[240,44],[412,110]];
+  function lerp(a,b,t){ return a+(b-a)*t; }
+  function animatePackets(now){
+    var t1 = (now/1500) % 2;
+    var seg1 = t1 % 1;
+    if(t1 < 1){
+      packet1.setAttribute('cx', lerp(pathUp[0][0], pathUp[1][0], seg1));
+      packet1.setAttribute('cy', lerp(pathUp[0][1], pathUp[1][1], seg1));
+      packet1.setAttribute('opacity', 1);
+    } else {
+      packet1.setAttribute('cx', lerp(pathDown[0][0], pathDown[1][0], seg1));
+      packet1.setAttribute('cy', lerp(pathDown[0][1], pathDown[1][1], seg1));
+      packet1.setAttribute('opacity', 1);
+    }
+    var t2 = ((now/1500) + 1) % 2;
+    var seg2 = t2 % 1;
+    if(t2 < 1){
+      packet2.setAttribute('cx', lerp(pathUp[0][0], pathUp[1][0], seg2));
+      packet2.setAttribute('cy', lerp(pathUp[0][1], pathUp[1][1], seg2));
+    } else {
+      packet2.setAttribute('cx', lerp(pathDown[0][0], pathDown[1][0], seg2));
+      packet2.setAttribute('cy', lerp(pathDown[0][1], pathDown[1][1], seg2));
+    }
+    if(!reduceMotion) requestAnimationFrame(animatePackets);
+  }
+  requestAnimationFrame(animatePackets);
+
+})();
+</script>
+</body>
+</html>
