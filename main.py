@@ -67,9 +67,9 @@ COMPANY = {
     "short_name": "Amvex",
     "founded_year": 2026,
     "tagline": "Software and game development, built end to end.",
-    "email": "hello@amvex.tech",
-    "phone": "+91 90000 00000",
-    "address": "Kochi, Kerala, India",
+    "email": "amarjith@amvex.in",
+    "phone": "+91 94960 63951",
+    "address": "Kozhikode, Kerala, India",
 }
 
 SERVICES = [
