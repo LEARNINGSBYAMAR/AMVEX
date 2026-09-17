@@ -29,6 +29,10 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field
+from fastapi.responses import FileResponse
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(
     title="Amvex Technologies API",
@@ -219,7 +223,7 @@ def submit_contact(payload: ContactMessageIn):
     # TODO: send an email / Slack notification / save to a real database here.
     return ContactMessageOut(status="received", received_at=record["received_at"])
 
-
+"""
 @app.get("/")
 def root():
     return {
@@ -230,3 +234,7 @@ def root():
             "/api/stack", "/api/process", "/api/contact (POST)",
         ],
     }
+"""
+@app.get("/")
+def home():
+    return FileResponse(BASE_DIR / "index.html")
