@@ -28,6 +28,7 @@ from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
 from fastapi.responses import FileResponse
 from pathlib import Path
@@ -40,6 +41,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
+app.mount("/assests",StaticFiles(directory="assests"),name="assests")
 # ----------------------------------------------------------------
 # CORS — add your real deployed website domain(s) here before you
 # go live. "*" is fine for local development only.
