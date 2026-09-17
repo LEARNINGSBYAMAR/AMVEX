@@ -3,14 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<meta name="theme-color" content="#0A0D16">                                      
-<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png"> 
-<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"> 
+<meta name="theme-color" content="#0A0D16">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192x192.png">
 <link rel="icon" type="image/png" sizes="256x256" href="assets/icon-256x256.png">
-<meta property="og:image" content="assets/amvex-app-icon.png">                   
-
+<meta property="og:image" content="assets/amvex-app-icon.png">
 <title>Amvex Technologies — Software &amp; Game Development</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -120,7 +118,7 @@
   header.site-nav.scrolled{ border-bottom-color:var(--line); }
   .nav-inner{ display:flex; align-items:center; justify-content:space-between; height:74px; }
   .brand{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:1.15rem; letter-spacing:-0.01em; text-decoration:none; }
-  .brand-mark{ width:30px; height:30px; flex:none; }
+  .brand-mark{ width:34px; height:34px; flex:none; object-fit:cover; border-radius:9px; display:block; }
   .nav-links{ display:flex; align-items:center; gap:34px; list-style:none; margin:0; padding:0; }
   .nav-links a{ text-decoration:none; color:var(--mist); font-size:0.95rem; font-weight:500; transition:color .2s ease; position:relative; }
   .nav-links a:hover{ color:var(--ink); }
@@ -322,10 +320,7 @@
 <header class="site-nav" id="siteNav">
   <div class="wrap nav-inner">
     <a href="#top" class="brand">
-      <svg class="brand-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16 2L29 9V23L16 30L3 23V9L16 2Z" stroke="var(--amber)" stroke-width="1.6"/>
-        <path d="M16 2V16M16 16L29 9M16 16L3 9M16 16V30" stroke="var(--violet)" stroke-width="1.2" opacity="0.7"/>
-      </svg>
+      <img class="brand-mark" src="assets/amvex-app-icon.png" alt="Amvex Technologies logo" width="34" height="34">
       <span id="brandName">Amvex</span>
     </a>
     <ul class="nav-links">
@@ -487,16 +482,14 @@ router = APIRouter()<br><br>
   <div class="wrap">
     <div class="footer-top">
       <a href="#top" class="brand">
-        <svg class="brand-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M16 2L29 9V23L16 30L3 23V9L16 2Z" stroke="var(--amber)" stroke-width="1.6"/>
-        </svg>
+        <img class="brand-mark" src="assets/amvex-app-icon.png" alt="Amvex Technologies logo" width="34" height="34">
         <span id="footerBrand">Amvex Technologies</span>
       </a>
       <div class="footer-links" id="footerLinks"></div>
     </div>
     <div class="footer-bottom">
       <span id="footerCopy">© 2026 Amvex Technologies Private Limited. All rights reserved.</span>
-      <span id="footerNote">Built with Python &amp; FastAPI.</span>
+      <span id="footerNote">Software • Web • Game Development</span>
     </div>
   </div>
 </footer>
